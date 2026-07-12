@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英国旅行地图 · 约克 / 达西庄园 / 爱丁堡</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; display:flex; flex-direction:column; height:100vh; }
+  header { background:#c0392b; color:#fff; padding:8px 14px; flex-shrink:0; }
+  header h1 { font-size:16px; }
+  header p { font-size:11.5px; opacity:.9; }
+  /* 底图压到 50% 透明度，路线/编号点浮在上面 */
+  .leaflet-tile-pane { opacity:.5; filter:saturate(.55); }
+  .leaflet-container { background:#f7f7f5; }
+  #tabs { display:flex; overflow-x:auto; background:#fff; border-bottom:2px solid #eee; flex-shrink:0; }
+  .tab { padding:8px 12px; font-size:12.5px; white-space:nowrap; cursor:pointer; border-bottom:3px solid transparent; color:#555; }
+  .tab.active { color:#c0392b; border-bottom-color:#c0392b; font-weight:600; }
+  #main { flex:1; display:flex; min-height:0; }
+  #map { flex:1; }
+  #side { width:360px; max-width:48%; overflow-y:auto; background:#faf8f5; padding:12px 12px 30px; border-left:1px solid #e5e0d8; }
+  @media (max-width:700px){ #main{flex-direction:column;} #side{width:100%;max-width:100%;height:52%;border-left:none;border-top:1px solid #e5e0d8;} }
+  .headnote { background:#fdf3e7; border-left:4px solid #e67e22; border-radius:6px; padding:8px 10px; font-size:12px; line-height:1.6; margin-bottom:12px; }
+  /* 时间线 */
+  .tl { position:relative; padding-left:4px; }
+  .stop { display:flex; gap:10px; cursor:pointer; }
+  .stop:hover .card { background:#fff6f4; }
+  .rail { display:flex; flex-direction:column; align-items:center; width:30px; flex-shrink:0; }
+  .num { width:26px; height:26px; border-radius:50%; background:#c0392b; color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,.3); flex-shrink:0; }
+  .rail .line { width:2px; flex:1; background:#d5c9bb; min-height:10px; }
+  .card { flex:1; background:#fff; border-radius:8px; padding:8px 10px; margin-bottom:4px; box-shadow:0 1px 2px rgba(0,0,0,.07); }
+  .card .time { font-size:11.5px; color:#c0392b; font-weight:700; }
+  .card .stay { font-size:11px; color:#888; font-weight:400; margin-left:6px; background:#f3ede4; border-radius:4px; padding:0 5px; }
+  .card b.name { font-size:13.5px; display:block; margin:1px 0 2px; }
+  .card p { font-size:12px; color:#666; line-height:1.55; }
+  .leg { display:flex; gap:10px; }
+  .leg .railc { width:30px; display:flex; justify-content:center; flex-shrink:0; }
+  .leg .railc .dash { width:0; border-left:2px dashed #b7a998; min-height:26px; }
+  .leg .how { font-size:11.5px; color:#555; padding:4px 8px; margin:2px 0 6px; background:#f3ede4; border-radius:12px; align-self:flex-start; }
+  .extras h4 { font-size:13px; color:#8e6e4e; margin:14px 0 6px; }
+  .xcard { background:#fff; border:1px dashed #d5c9bb; border-radius:8px; padding:7px 9px; margin-bottom:6px; font-size:12px; color:#666; cursor:pointer; }
+  .xcard b { color:#444; font-size:12.5px; }
+  .leaflet-popup-content { font-size:12.5px; line-height:1.6; max-width:250px; }
+  .leaflet-popup-content b { color:#c0392b; }
+  /* 图片带：左右滑动，一屏 2-3 张 */
+  .shots { display:flex; gap:6px; overflow-x:auto; margin-top:7px; padding-bottom:3px; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; }
+  .shots::-webkit-scrollbar { height:4px; }
+  .shots::-webkit-scrollbar-thumb { background:#ddd3c6; border-radius:2px; }
+  .shots img { height:104px; width:auto; max-width:none; border-radius:6px; object-fit:cover; flex:0 0 auto; scroll-snap-align:start; background:#eee; cursor:zoom-in; }
+  .gmaps { display:inline-block; margin-top:6px; font-size:11px; color:#c0392b; border:1px solid #e8c9c3; background:#fdf1ef; border-radius:12px; padding:2px 8px; text-decoration:none; }
+  #lb { position:fixed; inset:0; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; z-index:9999; }
+  #lb img { max-width:94%; max-height:94%; border-radius:8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚂 旅行时间线地图｜7/12–7/17 约克 · 达西庄园 · 爱丁堡</h1>
+  <p>地图上按编号①②③走，虚线=步行，实线=火车/公交/电车｜点时间线卡片定位</p>
+</header>
+<div id="tabs"></div>
+<div id="main">
+  <div id="map"></div>
+  <div id="side"></div>
+</div>
+<div id="lb"><img id="lbimg" src=""></div>
+<script>
+document.addEventListener('click', e=>{
+  const im = e.target.closest('.shots img');
+  const lb = document.getElementById('lb');
+  if (im){ document.getElementById('lbimg').src = im.src.replace(/=w\d+-h\d+/,'=w1400-h1050'); lb.style.display='flex'; }
+  else if (e.target.closest('#lb')) lb.style.display='none';
+});
+// leg.m: walk/bus/train/tram/taxi ; leg.t: 描述文字（到下一站的交通）
+const LEGC = { walk:"#8d8d8d", bus:"#27ae60", train:"#2980b9", tram:"#16a085", taxi:"#f39c12" };
+// 图片：Google 地图上该地点自己的实拍照片（按地点核对过，不会张冠李戴）
+const G = b => "https://lh3.googleusercontent.com/gps-cs-s/"+b+"=w520-h390-k-no";
+const W = u => u; // Wikimedia 直链
+const DAYS = [
+{
+  name:"7/12 约克 → 夜宿谢菲",
+  note:`🚄 <b>09:18 Finsbury Park → 11:26 York</b>｜🚄 <b>20:42 York → 21:55 Sheffield</b><br>
+  ☀️ <b>今日约克：24°C / 12°C，大晴天，UV 5（中等）｜日出 04:47，日落 21:31</b><br>
+  🌡️ <b>最热是 13:00–17:00</b>——这段已经安排成<b>室内</b>：大教堂 → 猫店 → 肉铺街（窄巷全程有阴影）→ 红房子古董店。别在这个时段走城墙。<br>
+  🌇 <b>天黑很晚（21:30 才日落）</b>，所以 18:00–20:00 光线最舒服：城墙、克里福德塔、河边留到傍晚拍，不晒还出片。<br>
+  ⚠️ 今天<b>周日</b>：大教堂游客开放约 12:45–15:00；商店 17:00–18:00 陆续关门（红房子 17:30 关，一定排在关门前）。<br>
+  🧳 车站行李寄存（LeftLuggage）在站内但要绕点路，先寄存再进城。`,
+  stops:[
+    {t:"11:26", stay:"寄存行李约20分钟", n:"约克火车站", ll:[53.9579,-1.0933], d:"到站先寄存行李。出站顺路：车站对面就能上约克城墙（免费），在墙上边走边拍大教堂——机位就在这段！", leg:{m:"walk", t:"🚶 沿城墙走进城 ≈15分钟（顺路拍照）"}},
+    {t:"12:00", stay:"排队+用餐≈1.5小时", n:"Betty's 下午茶（当午餐）", ll:[53.9598,-1.0851], d:"6-8 St Helen's Square。女王最爱百年老店：经典下午茶£29.9~44.5/人，或£13.5两个司康+茶的套餐（司康是精华）。下层三明治免费续。越晚排越久，现在去刚好。可不给小费", g:"Bettys Café Tea Rooms York", imgs:[G("APNQkAHC0PbLzCvOt9kBtY3fK3FOCud0O5I9_MK1FQMlnmu21PteoGghNTcBMapu5QhWQQkCcxcGesaNOKcqppL10D65-0zRjHC2cc_uivx2_l-u9VWOtyrtzCHnhMwZptwsrh1IN_2E"),G("APNQkAFhtauCWCcd8uCyMMyKDoDtC2Vn9bFnNnuzm7jfysml2tjHAY85WZ53bQ6N2izu1qDpcV6W9Spx5ZZPbCviDMBarYstyyg44UkN5Mv5tsORA2S338a0D0ZtJXTqIdf4CEDhmfUeXf9VuQGc"),G("APNQkAFFfbifG3OIvgqjEzt6LE4ZyauGNb_TmFJBsgZdt5N9npDDjCWAhCkiHo1rP6Z-4GXLFhZizEV8ZrTnsLR9KMMaVGF35B2bdzjdqrjqlEl30upYX2-vL6ow7o7cet_ldvho9GwL")], leg:{m:"walk", t:"🚶 步行4分钟"}},
+    {t:"13:40", stay:"≈1小时15分", n:"约克大教堂 York Minster", ll:[53.9623,-1.0819], d:"欧洲最大中世纪哥特教堂，门票£16(学生优惠)。⚠️周日约15:00停止游客入内，先来这！纪念品店买'治愈小石头'和Jellycat。教堂后草坪找帕丁顿熊合影", g:"York Minster", imgs:[G("AHRPTWk6K6IK6CdFzOmu-X06-U1XtCsdwcHH8dHrMwoWAzT9nzvDQKQyGD9xeeh5ZZWFGoyEGwOwi989TQwlQPb82Csa18B9e-SW0IoTYkAQmSUCry2Spj_0IZKrwo8X4X2Ya8wW_NgsaA"),G("APNQkAHply7_A-3pw0qFs9nExBYVVnCMLfI84m41dhkHakG6MySIE_x7Al_MLcbq3RGO-VBhmZ2620ZlGibo76CXj3HKdGjdbC4F8pJ4YCYP33nOmM4L6E94J9oyWizoVK3uhveSNZkuWA"),G("APNQkAGjhdnsj6HWsMY14oZqQB4Jt6DdAde3V2Nu6D1rwKnSEY4QpbkwaydYpkUOQq771f5KqnW_9Eo7L6UsRKiYtYQJfgvnEyNX22syGiQshyuQBWvD-gExNB19U035MmWutvN52wl-gBcpbIsE")], leg:{m:"walk", t:"🚶 步行3分钟"}},
+    {t:"15:00", stay:"≈20分钟", n:"The Cat Gallery 幸运猫", ll:[53.9608,-1.0827], d:"45 Low Petergate。两层猫猫周边，给不想排小鬼队的人一只幸运猫", g:"The Cat Gallery York", imgs:[G("AHRPTWkZM8Sl_hWq3emdrsu5x0N-MBswy-BM4JhVj3Orjgv1CAgShFqk_y0_VTRVHtVQ0q33-icXrSDJKud_GeS56QbMDwH8kOPaGLoXCx6dbuf5YCFbFg6IG7cHBHkgv4XPkyHt_X4yXY9_Iis"),G("APNQkAE6WuNKiI0Kg8zoTXP296TWdpTa1E5QL0Lt4bp4ZBsIBTqCuGra30sA17mBvovD-Nhb6_Sgqt8oPGOrS6_y7Mnmn7p2rG_hzAe0ld_nLfyUC3Gu516dZr4cWDt7ErzlQdXhLbsIc_wqANQ")], leg:{m:"walk", t:"🚶 步行3分钟"}},
+    {t:"15:25", stay:"≈1小时10分", n:"肉铺街 The Shambles", ll:[53.9585,-1.0803], d:"对角巷原型！一条街全在这：①约克小鬼老店(YO1 7LZ,小£9/大£18,排队~15分钟) ②The Potions Cauldron黄油啤酒£4.99+魔法表演 ③Hebden Tea买creamy茶叶 ④Freckleface香薰(£12.5/10块) ⑤饿了来个Shambles Kitchen烟花三明治£10.5", g:"The Shambles York", imgs:[G("APNQkAFuM3PNnEV8tlg2nq5LLfhOTPNY-TfelHfd4MxFEcCP6Q_5lwPBH1U-EWcveV2_CmgUwcbT3ZJeZmrbZztXsVk4OvoQgSovNTTPFoo7M7Z3KrsfG21yiouhpqNoUuZ_v2FpjOdjkQ"),G("AHRPTWkQ0ApotB7_dZgri20G4FrvMa-GYyhsyE6NCKa2E9CsZKYy001x7bi60m9ITAv-fTgacqhJ5NXWqM5EJ49vOjBllSTjbwMDmKcBW3KF6eyDrKTXmiwIxtPX1h-oADP2xJw5dQ9N68jtR4o"),G("AHRPTWm7oFQQQ6PROFLKjHJEOm-leepbhFWdzchC5aKLka2HSiwkUO8rx_dgvAzixnejTaY6-NnQVQOp3Phs5KYpJ6D4afNutaBHMRQn4exd-8U29p-5dsHMBEIqsTRWJrX2rQgqagt3BfcOnHkf"),G("APNQkAHeXdC2xzCgrJzeRwBhScTYV-FRGPxPbHPV5nKnmK6Cera3kozchr4-OuSakZLTyeJIyig3NPVx1w5RvAauk7rh5XTkOiIOy342wvUUr8b131PDCgqazeuenk4W9QTMd4mhv4Hldq7TcGqy"),G("APNQkAGDTwK0LD0tGuLZgrv8R9QSHKTUu5yIgCabVIuKiqlvl3SJPeHCfZVcdiZhBQr_tJuYgfsgFtGDizEcr9rGkzIy2fjuvz72wgEKignN0BGeUuWmwld9UAhRxwJcFWiLYS4ikI4TxQ08YSXN"),G("APNQkAEILFBgoGmxyPzU9aSadFS5r3MTYbFYvTBSjD_EhOpTBT-dO9Ldu7YnN9YuhVP-smOGAxfJqlmCzGrg5ktWIMdRSAOXnBOloJmhep6qR_VUu2o-usbpar2ef1IPnRd8S3iagE_4")], leg:{m:"walk", t:"🚶 步行4分钟"}},
+    {t:"16:40", stay:"≈45分钟", n:"The Red House Antique Centre 红房子古董店", ll:[53.9617,-1.0846], d:"你们的必去！大教堂旁古迹建筑里三层楼古董，每个柜台都能看好久。⚠️一般17:30左右关门，抓紧", g:"The Red House Antique Centre York", imgs:[G("APNQkAHYvF9mTyomsgPp9Zgq5eVtr7y7E8ig5fA-9Odr2wdmarR4M6Ftj9pRxRRhTr8BrEsZP1mVCRRZcwQqhdOO1jE5c2r-8dmHHm0G-gCUw-J8NR2jfbN1-ukWTD_NDaxnyghE_iWH"),G("AHRPTWleBBCSs2YjbL3WsiEki4iK2RkfocIo9SevskMBeATaKkB_ck2qXmczEuXx628BQsVQbSFRJEjNXMZDyFGjdhTmkilU6TOcVfxXHQmkEV9tebwL3k_ONOddvs1Bt4uczQXgoiQA"),G("AHRPTWl63M-9_WTkxra_WxjKHltNYLFRPNlDdbHV8qOhiBzHpzmkDFkViF07aH-dLe1Xr9J0vmg6ihxJ9Fho127Pwx2wfvmJlzi3VLgy2eAHYE9my6j2-WAavS1pyMKxkAeo03EZBg_oi5_Bdac")], leg:{m:"walk", t:"🚶 步行6分钟（经Stonegate顺路逛）"}},
+    {t:"17:35", stay:"≈20分钟", n:"York Gin + Amorino 冰淇淋", ll:[53.9576,-1.0791], d:"12 Pavement约克金酒：试饮+小组合装伴手礼。旁边Amorino小甜筒£5.8选4味（酸奶味0脂超好吃）当餐前甜点", leg:{m:"walk", t:"🚶 步行5分钟"}},
+    {t:"18:00", stay:"≈30分钟", n:"克里福德塔 + 乌斯河边", ll:[53.9556,-1.0800], d:"塔外观拍照即可（进塔£9帖子说不值）。沿河走到King's Staith码头，傍晚河边很惬意。体力还行可再上一段城墙", g:"Clifford's Tower York", imgs:[G("AHRPTWlSv6HAXyCpFP0xDqMKN1XdCXX8AKX0CcI7WciHn86usS1-YE1ZefpIHG84113vk5X4bgHJhiI_FBUcCT8v_dE4xRWJrs1MONV__9cFA4JmiY-6pXTL_XrCcIcNsvTMqoGBsDRXoA"),G("APNQkAGTOyXhxA0L4GPsWkOtTwqPj0VuUPBskyYTrPXC0AjG2RYDd4iH4puWQGQmpqM0AEta0WgxK0gwbsBXIt9PtuJMUizm0mDK7iZFxoFAufXBHiNR7aOraglrMGboeNUFdIaNP9GBaw"),G("APNQkAG9G8QITj8sCLpns7olo-pb-7LAdUsR19bmX4EyzYn_oHY8G67_BNqH3vWqKV96DDFoQO159pOiC40m5feIGxVu0Vy25D0BwPmP0BcnNQohtRzg6Yu0r9iDN3n6LthLhoT2um4Gb05p_0pp")], leg:{m:"walk", t:"🚶 步行8分钟"}},
+    {t:"18:40", stay:"≈50分钟", n:"Drake's Fish & Chips 晚餐", ll:[53.9609,-1.0830], d:"帖子认证'吃过最好吃的炸鱼薯条'，外脆里嫩记得撒盐！吃完往车站方向走", g:"Drake's Fish & Chips York", imgs:[G("APNQkAGq_rgkVYYpa3l04fYA_Fg04FP9KoaiKM0LPe0LQ_LO9yZ6kADAArZ3aDZ5RqfpYtpR2m5OjOC35CHcxPozlgHrdjXfrdl1nqsSLTySAONR4b7JrVP_RtHie6I7dlNUxQ2yv18I"),G("APNQkAE0YxqcTAlUzplHa6AQP7dHIhJpp5e216NjqxuElbB3A7Tk-gifDcIAUTUGwMrHH0Jt9v2aqF8lH49jh4d7QWsnPVZsvfzB-js82axvJKO4wjexpgXAov8nsY0b-LHZz4-PVsCv1X6IdvUK"),G("APNQkAF-mPdJvM1YMUmj4Cc9C32lhxJiHxgcXK-N0LUnZ3S2-rJqZXl3iZNY-KMAeu9ZN9-sZ56mdWJOIOQNcueWrVytL-R34oQv1gT-FjFPQYB84Oqs_kjkHUUPPHdFZCtncktkhd4"),G("APNQkAFyGBpTRhetjuR3QpBl3zjh67oYq5WdS1B62u7o1LqNoA5XexPAiPW7t_X2VCrX9RMXtSpwhIm1smLUadQB9ZvI_JTEz7ChFLQwXHjWLCDGRhg0viC1Uq3n6ZdHfk5YSV8L15vu")], leg:{m:"walk", t:"🚶 步行18分钟（取行李预留时间）"}},
+    {t:"20:00", stay:"候车", n:"约克火车站 → 谢菲尔德", ll:[53.9581,-1.0935], d:"取行李，20:42发车，21:55到Sheffield", leg:{m:"train", t:"🚄 火车 20:42→21:55（1小时13分）"}},
+    {t:"21:55", stay:"过夜", n:"谢菲尔德站 → Airbnb", ll:[53.3782,-1.4622], d:"出站后：步行约18分钟 或 打车5分钟(£6-8,晚上建议打车)。到达后办理入住", leg:{m:"taxi", t:"🚕 打车5分钟 / 🚶 步行18分钟"}},
+    {t:"22:15", stay:"晚安💤", n:"谢菲尔德住处", ll:[53.3811,-1.4650], d:"明早10:00前退房，但我们7:45就得出门赶火车"}
+  ],
+  extras:[
+    {n:"国家铁路博物馆（免费）", ll:[53.9599,-1.0963], d:"就在车站旁，从10/11站台可直接进。如果对火车感兴趣，可以把①之后先来这45分钟，后面依次顺延"},
+    {n:"City Cruises 游船（备选）", ll:[53.9563,-1.0819], d:"傍晚炸鱼薯条主题游船~1小时。想坐的话替换掉⑧克里福德塔+⑨改在船上吃"},
+    {n:"Aly's Bakery（备选）", ll:[53.9645,-1.0846], d:"81 Gillygate，'全英top1巴斯克'£4.9超甜。顺路的话买一块带上火车吃"}
+  ]
+},
+{
+  name:"7/13 达西庄园 → 夜车爱丁堡",
+  note:`🚄 <b>08:11 Sheffield → 08:27 Chesterfield</b>（open return 往返票）｜🚌 <b>170路</b>往返庄园｜🚄 <b>19:22 Sheffield → 23:21 Edinburgh Haymarket</b>（纸质票提前取！）<br>
+  ☀️ <b>明日：24°C / 10°C，一整天大太阳，UV 5｜日落 21:30</b><br>
+  🌡️ <b>我把顺序调过来了：上午先逛花园（凉快），13-15 点最晒的时候躲进 House 室内</b>，下午 3 点太阳斜了再补花园。庄园里遮阴很少，<b>带水、防晒、帽子</b>。<br>
+  ✅ 你们避开谢菲尔德218路直达是对的——有帖子在总站等9:10/9:40的218全都没来！<br>
+  🎫 达西庄园门票<b>今天出发前就在官网订好</b>：House+Garden 工作日£32（选不赞助£29.09）。⚠️House 15:30 停止进入、Garden 16:00 停止入园。`,
+  stops:[
+    {t:"07:45", stay:"", n:"Airbnb 出发（带上全部行李）", ll:[53.3811,-1.4650], d:"退房。行李带去庄园寄存（门口投£1硬币，取回退还）", leg:{m:"walk", t:"🚶 步行18分钟到火车站（或打车5分钟）"}},
+    {t:"08:11", stay:"车程16分钟", n:"谢菲尔德站 → Chesterfield", ll:[53.3782,-1.4622], d:"08:11发车，08:27到。open return票今天全天有效", leg:{m:"train", t:"🚄 火车16分钟"}},
+    {t:"08:27", stay:"等车≈20-30分钟", n:"Chesterfield 站 → 170路公交站", ll:[53.2381,-1.4200], d:"出站<b>左手边</b>就是公交站！坐<b>170路</b>(Stagecoach)，上车买票£3——<b>车票留好，进庄园免费换讲解器</b>。豪华双层巴士，沿途穿过小镇和大片草地很美", leg:{m:"bus", t:"🚌 170路 ≈35分钟，夏季直达庄园门口"}},
+    {t:"09:35", stay:"寄存行李+等开门", n:"到达 Chatsworth House", ll:[53.2276,-1.6118], d:"门口寄存处投£1硬币存行李。<b>进House前先上厕所（里面没有！）</b>", leg:{m:"walk", t:"🚶 原地"}},
+    {t:"10:00", stay:"≈2小时", n:"Garden 花园（趁凉先逛）", ll:[53.2260,-1.6080], d:"<b>调整过：花园放上午</b>——今天大晴 24°C，花园全暴晒，上午 20°C 出头最舒服。很大！喷泉、迷宫、矿洞等主题。天气好可加坐敞篷观光巴士绕庄园看英伦乡村", g:"Chatsworth House garden", leg:{m:"walk", t:"🚶 走回 House 一侧的餐厅"}},
+    {t:"12:00", stay:"≈45分钟", n:"花园/庭院里午餐", ll:[53.2271,-1.6098], d:"三明治、小点心、咖啡、冰淇淋。找有遮阴的位置，顺便上厕所（<b>进 House 前一定先上，里面没有</b>）", leg:{m:"walk", t:"🚶 步行3分钟到 House 入口"}},
+    {t:"12:45", stay:"≈2小时", n:"House 宅邸参观（室内避晒）", ll:[53.2278,-1.6112], d:"<b>把室内的 House 放在最晒的 13-15 点</b>。像大型博物馆，跟着讲解器逛2小时。⚠️<b>House 15:30 停止进入</b>，12:45 进门时间很充裕。出口就是礼品店", g:"Chatsworth House", imgs:[W("https://upload.wikimedia.org/wikipedia/commons/f/f6/Chatsworth_House_-_geograph.org.uk_-_743169.jpg"),W("https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Chatsworth_-_Lavender_Avenue_Alongside_the_House.jpg/960px-Chatsworth_-_Lavender_Avenue_Alongside_the_House.jpg"),W("https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Chatsworth_%2848502656212%29.jpg/960px-Chatsworth_%2848502656212%29.jpg")], leg:{m:"walk", t:"🚶 出礼品店，回花园补漏"}},
+    {t:"14:45", stay:"≈45分钟", n:"花园补漏 + 取行李", ll:[53.2265,-1.6090], d:"上午没逛完的温室/迷宫补一下，太阳斜了没那么晒。然后回大门口取行李（£1硬币退还）", leg:{m:"bus", t:"🚌 170路回 Chesterfield ≈35分钟（提前看好门口站牌时刻表！）"}},
+    {t:"16:45", stay:"", n:"Chesterfield 站", ll:[53.2381,-1.4200], d:"打出富余！镇上有著名歪顶教堂，等车时间长可以看一眼", g:"Chesterfield Parish Church St Mary and All Saints", imgs:[G("APNQkAGRM1ffLpUG1yoXuvXTrj97_ZC3GUeHHO27qJzTcx4Sj24xQWa8xA2LZpvWAdvNaExLmubiXl5SL_cQHL8TL4dpS7pAM8c_2oUC-Y4G8hR5ESsD2G9ySKXHME1LLD0jDnvDvetjfQ"),G("APNQkAFZJFYm1qVRxlmVGHQ0iavR1sqHYUFR6F3PXLgxF8cnP_c9InEFzeZlubndx-jA7HuZzEsmEUx93Bv-jw1ROvxI-KOGi9XW-pS5yEtLDHiMAC0rfkfya-rcAshvh3Z_GOPR9zTsmVKDX5Cu")], leg:{m:"train", t:"🚄 火车≈15分钟（open return，班次多）"}},
+    {t:"17:30", stay:"晚餐≈1.5小时", n:"谢菲尔德站附近晚餐", ll:[53.3782,-1.4622], d:"站内外快餐或车站对面Sheaf St一带。别走远，19:22的车<b>是纸质票，先去取票机取好</b>", leg:{m:"train", t:"🚄 19:22 → 23:21 Haymarket（4小时，买点零食上车）"}},
+    {t:"23:21", stay:"", n:"Edinburgh Haymarket 站", ll:[55.9457,-3.2187], d:"深夜到达。出站步行去Airbnb", leg:{m:"walk", t:"🚶 步行≈10分钟（跟app导航）"}},
+    {t:"23:35", stay:"晚安💤", n:"爱丁堡住处（Haymarket 附近）", ll:[55.9457,-3.2187], d:"16:00 后入住，住到 7/17"}
+  ],
+  extras:[]
+},
+{
+  name:"7/14 爱丁堡 · 老城经典",
+  note:`🌤️ <b>7/14 爱丁堡：19°C / 11°C，多云转晴，UV 3｜日出 04:46，日落 21:49</b>——比英格兰凉快，晒不到人，外套带上（海风大）。<br>
+  🌇 <b>日落 21:49！</b>晚上有大把时间：吃完饭 21:00 才上卡尔顿山刚刚好。<br>
+  ⚠️ <b>爱丁堡城堡 18:00 关</b>（最后入场约 17:00），所以放上午。<b>Makars 12:00 才开门</b>，不可预约，16:30 去拿号。<br>
+  今天全程<b>步行</b>，老城很紧凑；市内公交 Lothian Buses 刷卡 £2/次，日票 £4.8。`,
+  stops:[
+    {t:"09:00", stay:"", n:"Airbnb 出发", ll:[55.9457,-3.2187], d:"", leg:{m:"walk", t:"🚶 步行≈30分钟（或电车到Princes St再走10分钟）"}},
+    {t:"09:30", stay:"≈2小时", n:"爱丁堡城堡", ll:[55.9486,-3.1999], d:"提前官网买票选9:30-10:00时段！一点钟炮(One O'Clock Gun)周一到周六13:00鸣放，玩到中午也行", g:"Edinburgh Castle", imgs:[G("AHRPTWntBoN_GGCFReiWDPUNz6EolBioUXMui5oN__sflpHct_-IPyV7Zd6w20UHRW-3o_AeNr9Ct9R0dDuqUCUSXeX43A2WhMb-cebB3Ekf-qMIPbRKHA1mD3T5cpcwL0a3Miv0sufd"),G("APNQkAHzPM-9AXRx2xfDPLSoySlPGhs49a8QMf4c9gG6GtvWmClqVWklPrExefCXmnsm8BBh5aU1GR1MAbAkL-7dF3urke6NQLfyOoknZB-fheC0nMvHNfQALmzUkyNxCiQGngRmCfLR"),G("APNQkAEpLyq-1ROk_xpQgVNMOTqpt2XGNcfPsPdPrirXE_I6GFCZ4PFzhI181Nkt6LBGz5OgKXbicpK-mx2zScxdP-Nzi31Yek3RtZNaA9RHc5B4Vazah3hKR7IexnqxC2M-Uhd1MuHyE2aI65Ez")], leg:{m:"walk", t:"🚶 下坡步行5分钟"}},
+    {t:"11:40", stay:"≈40分钟+午餐1小时", n:"维多利亚街 Victoria Street", ll:[55.9489,-3.1913], d:"彩色弯街，对角巷灵感来源，拍照必来。街上和下面Grassmarket一带解决午餐", g:"Victoria Street Edinburgh", imgs:[G("AHRPTWmQeGF5bL0J3NvF64_ooUbjAB1rgg3nf7g7z69SEh6qpNzE_d-OBOEXWv0pgprs4bX2CtPXzj2BRQPf6WYgJpt7ZJHLlBhfcUqvoyLUsENjcsi1VSFrYA7oK2pdf_vHE-VrJcQlCw"),G("AHRPTWn9K-bY8V--L1972kIAqQXqxw3I8UgZbEeT6WwZZqrUXsSOkMbQ2fmM_FKYiRrQbgtM37p3hRnyUi4eoHIC3odq-vCTlA4LW_MFG4JltxX_sldqQuqCs7mJ1GAv8D-mFDd5xBLa1Q"),G("AHRPTWklYjwuTV7Tr4vQOeAG7O-zZlQ2ls_HspkVuUTx3aVQLoHbQcxk8zf-OP-K0h4GqnrgIRQG0EB1Dbugfsn-EMzpSi-E2fwR0oHlOiLkAruG7aOq2UODfYo-Vp7NIabapbqBWfNmBA")], leg:{m:"walk", t:"🚶 步行5分钟上皇家一英里"}},
+    {t:"13:30", stay:"≈1.5小时", n:"皇家一英里 Royal Mile", ll:[55.9497,-3.1900], d:"从圣吉尔斯大教堂往下慢慢逛，纪念品店、羊绒围巾、威士忌店都在这条街", g:"Royal Mile Edinburgh", imgs:[G("AHRPTWkTfGPHFddD7kWIUjyHgjPagNDwq8vN0nQxP9_WDmW9ZAkU606HlQ_GP4k28_PRUQyVPvQM08yoDR9jVpl01PDQaxcUF-eLRyl7o5bSAP1Ycqs-MEBHFStau8TVyBEmIfsExN6oMcSwyUTC"),G("APNQkAEldsCARLlTUg33XsHSEy5jyI_3o40Ko3JgSO5cdhEFVS-aa7lglXAcr6ET2DmQ8D-LYrEQ4tiMoacSbOQPwf_kVvF6KFeRVIrmndbE1B5Na-Mt6T_eoGGvbcfcLvwbISoldx9T3mvAUyr0")], leg:{m:"walk", t:"🚶 步行8分钟到The Mound"}},
+    {t:"16:30", stay:"拿号", n:"Makars Gourmet Mash Bar 拿号！", ll:[55.9495,-3.1913], d:"帖子五星苏格兰餐，<b>不可预约：16:30准时来拿号</b>，等位约1小时", leg:{m:"walk", t:"🚶 等位期间步行3分钟去王子街花园"}},
+    {t:"16:40", stay:"≈45分钟", n:"王子街花园 + 司各特纪念碑", ll:[55.9524,-3.1932], d:"等位时在花园里坐坐，拍司各特纪念碑和城堡侧影", g:"Scott Monument Edinburgh", imgs:[G("APNQkAFnR1BcTuw7qPPWLGn0JWtgGqnGCe43IcYIUqeTUm8JLRyg1CJp6k3klJfyx6UiesqCj6NsLY2JohG4f-GkIT50DGIVOkHyWT8ArwLztPEbCRbxrpoa312JcPoTkV5V3j2ws-sm"),G("AHRPTWnr3rm1b5aNidrOMPXI7zTVGGQANDFnIWPkEGHK7-1ZASqgTmtQko5gM3WEmYt59_aFuKmYQBrnEjkiBzJdwfSrnrW4p9fqnzP-6TwOLvTfTpTfiMBEyFyrL5_64dkxvrtjzFPR")], leg:{m:"walk", t:"🚶 步行3分钟回Makars"}},
+    {t:"17:30", stay:"≈1.5小时", n:"Makars 晚餐", ll:[55.9495,-3.1913], d:"羊肉>牛肉，scotch egg必点（脆！配酱绝了），土豆泥打底，两人约£58", g:"Makars Gourmet Mash Bar Edinburgh", imgs:[G("AHRPTWmrqgPbaoXrRdSMDkC2p3LphwTcALQxPNeoxBVSSCBvGGFbDAdfX8FDitP5Zg8Qmqw0g32bx4xyXqEh6689zxOooELYnzlVPYqEHTn8IPd5h9K42Qrf5ZZU8K9da9tcqmV6gZig"),G("AHRPTWn96xpvLMKmT4V8O3E65VqO-8ZXlHtNrPobmkHI4cmIOAO0AxjWCsqzpro1Wk3iitnNtBWTSFYDHRyV8SvSF3iqI7oY4OhsjDyWpnpgQptQsL18E7lYybMXX_-3kXV3Sgcf7ftvvDfO-Nc"),G("AHRPTWkqpLIqi6C2Rk5v2ftWSP8_CkADJzXKlM2lJ84Q_60KK9nxKv74z7HGA2cOZp3dXR1oxx-y8xnNWxuEFZce5ES369p0qmV4sGh0b_ZTgx5Iwm5TpQMQbqO4FVTn7hPBmwa_G5I")], leg:{m:"walk", t:"🚶 步行6分钟"}},
+    {t:"19:15", stay:"≈40分钟", n:"Knoops 热巧克力", ll:[55.9486,-3.1932], d:"帖子五星，可选巧克力浓度，晚饭后甜点", g:"Knoops Edinburgh", leg:{m:"walk", t:"🚶 慢慢走王子街 / 逛逛，20:50 前到山脚"}},
+    {t:"21:00", stay:"看日落≈1.5小时", n:"卡尔顿山 Calton Hill 看日落", ll:[55.9553,-3.1825], d:"⚠️<b>爱丁堡今天日落 21:49</b>（这里 7 月天黑极晚）。21:00 上山，10 分钟登顶，正好卡住金色时刻→日落。看完 22:30 左右天还蒙蒙亮，走回去/坐公交都安全", g:"Calton Hill Edinburgh", imgs:[G("APNQkAEXmjEddvoU6b2z_NUFDAc1kn0cxDUe05kpCDdM_zsZfzGbHotyOYoPfLm9p4VavnJBwKRZ70dshE6ukgoYVjBi315WwXL4Z8NjMxFJK7dNyI8XB3KrX7gtk4HTtFL-fKRVJR2Ldg"),G("APNQkAF-QLT5xyvC8KdoaQZo6lVU5OHPNr5E18FZ_LRQZi5EGBzE2QVtc1yKvarWjrVBxc8QZNEPA0vpNWfyZf9c5uQk_qGxa8YjE-U32YIV8xSQnGdSIo1ciusYf27SiNFblFhaEFEjJ8bdlHCw"),G("APNQkAGY8UYJX7hccyGlevvl2wa2ZBAsdohS68ICvYVJQc1D2cl0JfFzwYivL-Jx3Tlegj51sXJZSOeV_SUEngOAJiowXjAyU2ltQPErHrCUlNyhqAyax0ENkn3baKTIX3ZoprkqRAGesg")], leg:{m:"bus", t:"🚌 Princes St 坐西行公交≈15分钟回住处（或步行35分钟）"}}
+  ],
+  extras:[
+    {n:"Waverley站 Bagel店（备选）", ll:[55.9519,-3.1892], d:"车站里DIY bagel会复烤很热乎，哪天路过车站顺便当早餐"}
+  ]
+},
+{
+  name:"7/15 爱丁堡 · 亚瑟王座+新城",
+  note:`🌤️ <b>7/15 爱丁堡：20°C / 10°C，少云，UV 3｜日出 04:48，日落 21:48</b><br>
+  🥾 <b>爬山放上午（09:40）是对的</b>——亚瑟王座全程无遮阴，中午上去最遭罪。穿运动鞋、带水、涂防晒。<br>
+  🌡️ 13-16 点最晒的时段安排在<b>室内/有遮阴</b>：玖茶 → 南区午餐 → 新城 Princes St / George St 逛街（店里有空调）。<br>
+  🌇 <b>日落 21:48</b>：BABA 吃完才 19:15，天还大亮着——可以再去 Dean Village 或王子街花园散个步，不用急着回去。`,
+  stops:[
+    {t:"09:00", stay:"", n:"Airbnb 出发", ll:[55.9457,-3.2187], d:"", leg:{m:"bus", t:"🚌 Lothian公交≈25分钟到荷里路德宫一带（或打车12分钟）"}},
+    {t:"09:40", stay:"≈2.5小时", n:"亚瑟王座 Arthur's Seat", ll:[55.9441,-3.1618], d:"死火山徒步，从荷里路德宫侧上山，往返2-2.5小时，山顶360°全景。累了走到Salisbury Crags拍照也够美", g:"Arthur's Seat Edinburgh", imgs:[G("APNQkAGNa2ZToZwucI9gTRxB8uhkPMVPEWe_r23p3iNW9qSv2IXjumLMI-zbdcSZyexAeQFzMe5yiOvx9_W2ffmeG7QtI1BojEj9rtAPjC_yILFa0Pr9b2NOWkIteaRSsWjOHxTMpgTZ"),G("AHRPTWmXCvzjaYJ2e_AIfkogb8yoOJBkyVhxQxd0ETYz7BZLJSCCCrG0-GHlC8aV5Xmy8wO7XyG83y6faxJBPPeTRDAPe-KEc0Vq2gra-0ZxhvSe5SpNflU9_vqjOXVVd3h8yVkf6vJa"),G("AHRPTWkyJZC8bTRXY0tUYZ5oEfF_4MJjNlekEnKWZoeFhBUUBk_CUo4VC6ByPxzlPLDF4GPfWegA3PDN541EICEAw7QkU14P4y-xDg6nHUNwi881qZesOOnOf-SEZiy7XBA3I0z7NtJe9iA2Mnc")], leg:{m:"walk", t:"🚶 下山步行15分钟"}},
+    {t:"12:30", stay:"≈30分钟", n:"玖茶 手作奶茶", ll:[55.9410,-3.1827], d:"16 Clerk St，就在山下这一片！龙眼栀子椰/希腊山楂冰乳酪/霸气榴莲(猫山王)。店员讲中文，复古上海风好拍", g:"玖茶 JIU CHA Clerk Street Edinburgh", leg:{m:"walk", t:"🚶 步行10分钟，南区找午餐"}},
+    {t:"13:15", stay:"≈1小时", n:"南区午餐（Nicolson St一带）", ll:[55.9447,-3.1857], d:"这一带是学生区，好吃不贵的选择多", leg:{m:"walk", t:"🚶 步行15分钟经北桥到新城"}},
+    {t:"14:45", stay:"≈2.5小时", n:"新城逛街：Princes St → George St", ll:[55.9530,-3.1990], d:"王子街平价连锁，George St精品店。中途可绕去Circus Lane小巷拍照（网红石板巷）", leg:{m:"walk", t:"🚶 步行5分钟"}},
+    {t:"17:45", stay:"≈1.5小时", n:"BABA 晚餐（黎巴嫩菜）", ll:[55.9524,-3.2073], d:"130 George St。帖子3星'可以试试不惊艳'：烤肉偏咸，pita饼趁热吃很香，两人约£55。不想吃这个就回老城随便找", g:"Baba George Street Edinburgh", imgs:[G("APNQkAEiGR0k5OnmBE9Cy_kbJZ-afSZ-H0pNZmFGsSvUxWUs42K2nvDYFPoxtVIPOPiXcMlWgL9MTBFioqOr4GMNSCz_UPCmxejS9K-QgOsjR_r1bYdbsqWTnX9FU-yXGurIgTA7uHrK7QYI9vM"),G("APNQkAGyIpg7nbOeL_7G_7GkREXYqkPGyGfng-kwnWW_1rLLcl4h-92IHfNfFLx6ZjXoIrhSHos7mbGh8ayyF3IEGEWY7iJG1VRLwMvnGpqRh1jMNjPOCfMnihdOFPI6HKVxW3BxghM"),G("APNQkAEW0IIx1oaEqNXJU2QqpuoMSFGtuypDsXacSWmz8Orr-qP5h_UP0CahYqR9SerFfkKlHWXTWGVSle99dJ0eFlNG9uu6pIxocy27L6NYRHZDBODc2wzA39f7DmGJyyZZLPNJmEd5")], leg:{m:"walk", t:"🚶 步行20分钟（天还大亮，不用赶）"}},
+    {t:"19:15", stay:"≈1小时（可选）", n:"Dean Village / 王子街花园 散步", ll:[55.9505,-3.2180], d:"⚠️之前这里写成'看日落余晖'是错的——<b>爱丁堡今天日落 21:48</b>，19 点太阳还高高的。爬山累了就直接回去；还有力气的话，Dean Village 傍晚人少最好拍", g:"Dean Village Edinburgh", leg:{m:"walk", t:"🚶 步行15分钟回住处"}},
+    {t:"20:30", stay:"自由", n:"回住处休息", ll:[55.9457,-3.2187], d:"今天爬山累了，早点休息（外面到 22:30 才真正黑）"}
+  ],
+  extras:[
+    {n:"Dean Village（备选）", ll:[55.9520,-3.2192], d:"童话感石头村，离住处步行15分钟，如果下午体力够可以替换掉一段逛街"}
+  ]
+},
+{
+  name:"7/16 爱丁堡 · 机动日",
+  note:`🌤️ <b>7/16 爱丁堡：22°C / 10°C（体感 24°C，这几天最热的一天），多云，UV 3｜日落 21:47</b><br>
+  🌡️ 正午最热时段在<b>室内的国立博物馆（免费）</b>，14:45 之后再去 Portobello 海边——海风一吹刚好，也是最舒服的时候。<br>
+  ⚠️ <b>苏格兰国立博物馆 17:00 关门</b>；皇家一英里的店大多 <b>18:00 前后打烊</b>，最后采购别拖到太晚。`,
+  stops:[
+    {t:"09:30", stay:"早餐", n:"Waverley 站 Bagel 店", ll:[55.9519,-3.1892], d:"DIY bagel复烤热乎，大部分人加肉", leg:{m:"walk", t:"🚶 步行10分钟"}},
+    {t:"10:30", stay:"≈2小时", n:"苏格兰国立博物馆（免费）", ll:[55.9470,-3.1905], d:"Chambers St。免费，多莉羊标本在这，屋顶露台能看城堡", g:"National Museum of Scotland", imgs:[G("AHRPTWnr2FSuEfYHiqJuc5AqyxOq6yPVNBUhHs2I77zqRe38r4aVceerMPu6gvAaUzBbY3kqZkGXFEjM0IVFuJAWa74ZwiJyoiKr5ESs5nYlGGQxexbJ7PH34s5XSBRwa7AjVV2xrc82"),G("APNQkAGvciwmenBebJGckg-w_6zU7-pKRQNOXfkoSZTA61tuZwm_jGK04Us0SbrZd6MtvZDVo-wDku7huRGgedAmtcz9ooONx1zG1pPzofzGyPocEVRDpvgdaGKz9BD6NQ5hsFzeFmBa"),G("APNQkAH4Aeb1Xgz9E6tSJGJsaXDjfkL_C7a0wU1t2hDyh2d81DLJ3-4v8TlY90bQYMyhnVcPOZN6Q-VKJukjWTWw0a4Fy0cVqIElrrcMYh4HRdYmsRWxSq7C7msXaV2nkQ0LziUGKnu1TwS62_LB")], leg:{m:"walk", t:"🚶 步行3分钟"}},
+    {t:"12:45", stay:"合影+午餐≈1.5小时", n:"忠犬波比像 + Grassmarket 午餐", ll:[55.9469,-3.1922], d:"博物馆门口就是Greyfriars Bobby小狗像，摸鼻子好运。Grassmarket一带午餐", g:"Greyfriars Bobby Statue Edinburgh", imgs:[G("AHRPTWnM5UoSwIM9BgtOZ63Sd9FxgGJ0wIVRonkRBMgEZ_Hmdm6qyPPnR-JkD-ELpBVsPbektyR00x7BOcMrYJLQtUDomlMPyi1aHKgxs4RRxY8oyHIDXmTJPGPII1nY8bIbqy_mPhUe")], leg:{m:"bus", t:"🚌 公交≈30分钟去Portobello（North Bridge上车）"}},
+    {t:"14:45", stay:"≈2小时", n:"Portobello 海滩（天气好）", ll:[55.9531,-3.1147], d:"本地人的海滩，散步吃冰淇淋。天气不好→改成Stockbridge小店街+Circus Lane（后两张就是Circus Lane）", g:"Portobello Beach Edinburgh", imgs:[G("AHRPTWlVCPiXzTVVwWJpu1NjNcsjFE9noCmDtWbYIn9osw0vuSdD-2xNpq7dXsv6gKWQO_tASgbkq7cQHv4vAcUkqcwlfFIUCdgxXh5Y87D-1OYFPEcrErl7GPIxd2G9bRRcMH6ML9F4Zw"),G("APNQkAFdQrTy2QWUFxCee_wNrkkidpjyFdAsATwpAZZTtl5kX7hQxCtj9h6A9n8VHYes93TROmSxnezPcXVBiW-dzfsPW7eEBpUL-Jdk-WgVd23fbJfSqtFlTmdeAnr7Hga4Ri_aOF_Sdw"),G("APNQkAHiEOa1KZ19Y5lZKjTcsuItI3i1R-DMdtNkDdcq-yYjdRcjhDuMsfivaBfonVJKU3x3AfurzG2H5SFCdKtOMihjshe4bUG--un4QVK5NWWl5x8s2UWUMYT6oOAmxdDxNWJtppcL"),G("APNQkAGszcn4pJuxQRTd5BMyL8iI-4V-nh5-ovSwJASZ7NilyALMvR8Lj7Jis1esPYWeIp9KenHDrX7um0nN6RqMDsylm0Hc7YretLeK7yI56CJMfw8blrDXFoLd6PBC_Ghx7i0zOaj_")], leg:{m:"bus", t:"🚌 公交≈35分钟回市中心"}},
+    {t:"17:30", stay:"≈1小时", n:"皇家一英里 补买纪念品", ll:[55.9497,-3.1900], d:"羊绒、威士忌、Jellycat高地牛，最后采购。明天就走啦", leg:{m:"walk", t:"🚶/🚌 回住处，收拾行李"}},
+    {t:"19:30", stay:"", n:"晚餐自选 + 收拾行李", ll:[55.9457,-3.2187], d:"想吃中餐可以再去玖茶那条街，Clerk St附近中餐多"}
+  ],
+  extras:[]
+},
+{
+  name:"7/17 返程伦敦",
+  note:`🏠 10:00前退房 ✈️ <b>EDI 19:55 → STN 21:20 瑞安航空</b>（中型机737，无餐食）<br>🧳 Airbnb app里有行李寄存85折（入住页面点'入住前寄存行李'那个入口），退房后寄存了继续玩大半天。<br>⚠️ 瑞安航空<b>提前网上值机</b>（不然柜台值机收费！）行李规格卡得严，随身包尺寸先量好。`,
+  stops:[
+    {t:"09:45", stay:"", n:"退房 + 寄存行李", ll:[55.9457,-3.2187], d:"10:00前退房。行李寄存好（app 85折券），轻装最后半天", leg:{m:"walk", t:"🚶 步行/电车进城"}},
+    {t:"10:30", stay:"≈4.5小时", n:"最后半天自由活动", ll:[55.9497,-3.1900], d:"补漏：没去成的Dean Village/再上一次卡尔顿山/或者找家咖啡馆坐着。午餐好好吃一顿", leg:{m:"walk", t:"🚶 15:30前取回行李"}},
+    {t:"16:00", stay:"", n:"取行李 → Haymarket 电车站", ll:[55.9457,-3.2187], d:"电车(Edinburgh Trams)去机场，7分钟一班，单程£7.5左右，刷卡即可", leg:{m:"tram", t:"🚋 电车≈25分钟直达机场"}},
+    {t:"16:45", stay:"值机安检", n:"爱丁堡机场 EDI", ll:[55.9500,-3.3725], d:"瑞安19:55起飞，17:00前到很稳。网上值机+下载登机牌", leg:{m:"train", t:"✈️ 19:55→21:20 (1h25m)"}},
+    {t:"21:20", stay:"", n:"伦敦 Stansted 机场", ll:[51.8860,0.2389], d:"Stansted Express火车≈50分钟到Liverpool Street，或National Express大巴（便宜但慢）。到家啦🏠 伦敦的收藏看另一张地图！"}
+  ],
+  extras:[]
+}
+];
+
+// 全局去重：同一张照片只出现一次
+(function(){ const seen=new Set();
+  DAYS.forEach(d=>(d.stops||[]).forEach(s=>{ if(s.imgs) s.imgs = s.imgs.filter(u=>{ if(seen.has(u)) return false; seen.add(u); return true; }); }));
+})();
+
+const map = L.map('map');
+// 底图：浅色 + 半透明（50%）+ 轻度去饱和，让路线和编号点凸显
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {attribution:'© OpenStreetMap © CARTO', maxZoom:19}).addTo(map);
+let layers = [];
+function numIcon(i, main){
+  const bg = main ? '#c0392b' : '#aaa';
+  return L.divIcon({html:`<div style="background:${bg};color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${i}</div>`,className:'',iconSize:[26,26],iconAnchor:[13,13]});
+}
+function showDay(idx){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active', j===idx));
+  layers.forEach(l=>map.removeLayer(l)); layers=[];
+  const d = DAYS[idx];
+  const side = document.getElementById('side');
+  side.innerHTML = `<div class="headnote">${d.note}</div>`;
+  const tl = document.createElement('div'); tl.className='tl';
+  const pts = [];
+  d.stops.forEach((s,i)=>{
+    pts.push(s.ll);
+    const m = L.marker(s.ll, {icon:numIcon(i+1,true), zIndexOffset:100}).addTo(map)
+      .bindPopup(`<b>${i+1}. ${s.n}</b><br><span style="color:#888;font-size:11px">${s.t}${s.stay? ' · '+s.stay:''}</span><br>${s.d}${s.leg?`<br><span style="color:#16745e;font-size:11.5px">➡️ ${s.leg.t}</span>`:''}`);
+    layers.push(m);
+    const stop = document.createElement('div'); stop.className='stop';
+    const shots = s.imgs && s.imgs.length
+      ? `<div class="shots">${s.imgs.map(u=>`<img loading="lazy" src="${u}" onerror="this.style.display='none'">`).join('')}</div>` : '';
+    const gm = s.g ? `<a class="gmaps" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(s.g)}">📷 更多实拍图 / 导航</a>` : '';
+    stop.innerHTML = `<div class="rail"><div class="num">${i+1}</div><div class="line"></div></div>
+      <div class="card"><span class="time">${s.t}</span>${s.stay?`<span class="stay">${s.stay}</span>`:''}
+      <b class="name">${s.n}</b><p>${s.d}</p>${shots}${gm}</div>`;
+    stop.onclick = (e)=>{ if(e.target.closest('.shots')||e.target.closest('.gmaps')) return; map.setView(s.ll, 16); m.openPopup(); };
+    tl.appendChild(stop);
+    if (s.leg){
+      const leg = document.createElement('div'); leg.className='leg';
+      leg.innerHTML = `<div class="railc"><div class="dash" style="border-color:${LEGC[s.leg.m]}"></div></div><div class="how" style="border-left:3px solid ${LEGC[s.leg.m]}">${s.leg.t}</div>`;
+      tl.appendChild(leg);
+      // 地图连线
+      if (i < d.stops.length-1){
+        // 白色描边（让彩色路线在底图上更跳）
+        const halo = L.polyline([s.ll, d.stops[i+1].ll], {
+          color:'#fff', weight: s.leg.m==='walk'?8:10, opacity:.9, lineCap:'round'
+        }).addTo(map);
+        layers.push(halo);
+        const seg = L.polyline([s.ll, d.stops[i+1].ll], {
+          color: LEGC[s.leg.m], weight: s.leg.m==='walk'?4:6,
+          dashArray: s.leg.m==='walk' ? '2 9' : null, lineCap:'round', opacity:1
+        }).addTo(map);
+        layers.push(seg);
+      }
+    }
+  });
+  side.appendChild(tl);
+  if (d.extras && d.extras.length){
+    const ex = document.createElement('div'); ex.className='extras';
+    ex.innerHTML = '<h4>⭐ 顺路备选（没排进主线）</h4>';
+    d.extras.forEach((x,i)=>{
+      const m = L.marker(x.ll, {icon:numIcon('☆',false)}).addTo(map).bindPopup(`<b>${x.n}</b><br>${x.d}`);
+      layers.push(m);
+      const c = document.createElement('div'); c.className='xcard';
+      c.innerHTML = `<b>${x.n}</b><br>${x.d}`;
+      c.onclick = ()=>{ map.setView(x.ll,16); m.openPopup(); };
+      ex.appendChild(c);
+    });
+    side.appendChild(ex);
+  }
+  map.fitBounds(L.latLngBounds(pts).pad(0.15));
+}
+const tabs = document.getElementById('tabs');
+DAYS.forEach((d,i)=>{
+  const t = document.createElement('div');
+  t.className='tab'; t.textContent=d.name;
+  t.onclick=()=>showDay(i);
+  tabs.appendChild(t);
+});
+showDay(0);
+</script>
+</body>
+</html>
