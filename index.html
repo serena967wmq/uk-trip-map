@@ -203,21 +203,22 @@ const DAYS = [
   ]
 },
 {
-  name:"7/15 爱丁堡 · 亚瑟王座+新城",
+  name:"7/15 爱丁堡 · 取货+亚瑟王座+日落",
   note:`🌤️ <b>7/15 爱丁堡：20°C / 10°C，少云，UV 3｜日出 04:48，日落 21:48</b><br>
-  🥾 <b>爬山放上午（09:40）是对的</b>——亚瑟王座全程无遮阴，中午上去最遭罪。穿运动鞋、带水、涂防晒。<br>
-  🌡️ 13-16 点最晒的时段安排在<b>室内/有遮阴</b>：玖茶 → 南区午餐 → 新城 Princes St / George St 逛街（店里有空调）。<br>
-  🌇 <b>日落 21:48</b>：BABA 吃完才 19:15，天还大亮着——可以再去 Dean Village 或王子街花园散个步，不用急着回去。`,
+  ⏰ <b>今天不用早起</b>——早上冷，睡饱了 11:30 再出门，白天到 21:48 才日落，时间完全够。<br>
+  📞 <b>出门前先打 CALZEAT：0131 556 0856</b>，说清楚昨天买了东西落在店里（哪两样、大概几点买的），让他们先帮你留好，到店直接取，省得白跑。CALZEAT 周三 11:00 开门，你到的时候正好开着。<br>
+  🌇 <b>今晚的日落交给卡尔顿山</b>（昨天没找对地方，今天补上）：21:00 上山，日落 21:48，10 分钟就登顶。`,
   stops:[
-    {t:"09:00", stay:"", n:"Airbnb 出发", ll:[55.9457,-3.2187], d:"", leg:{m:"bus", t:"🚌 Lothian公交≈25分钟到荷里路德宫一带（或打车12分钟）"}},
-    {t:"09:40", stay:"≈2.5小时", n:"亚瑟王座 Arthur's Seat", ll:[55.9441,-3.1618], d:"死火山徒步，从荷里路德宫侧上山，往返2-2.5小时，山顶360°全景。累了走到Salisbury Crags拍照也够美", g:"Arthur's Seat Edinburgh", imgs:[G("APNQkAGNa2ZToZwucI9gTRxB8uhkPMVPEWe_r23p3iNW9qSv2IXjumLMI-zbdcSZyexAeQFzMe5yiOvx9_W2ffmeG7QtI1BojEj9rtAPjC_yILFa0Pr9b2NOWkIteaRSsWjOHxTMpgTZ"),G("AHRPTWmXCvzjaYJ2e_AIfkogb8yoOJBkyVhxQxd0ETYz7BZLJSCCCrG0-GHlC8aV5Xmy8wO7XyG83y6faxJBPPeTRDAPe-KEc0Vq2gra-0ZxhvSe5SpNflU9_vqjOXVVd3h8yVkf6vJa"),G("AHRPTWkyJZC8bTRXY0tUYZ5oEfF_4MJjNlekEnKWZoeFhBUUBk_CUo4VC6ByPxzlPLDF4GPfWegA3PDN541EICEAw7QkU14P4y-xDg6nHUNwi881qZesOOnOf-SEZiy7XBA3I0z7NtJe9iA2Mnc")], leg:{m:"walk", t:"🚶 下山步行15分钟"}},
-    {t:"12:30", stay:"≈30分钟", n:"玖茶 手作奶茶", ll:[55.9410,-3.1827], d:"16 Clerk St，就在山下这一片！龙眼栀子椰/希腊山楂冰乳酪/霸气榴莲(猫山王)。店员讲中文，复古上海风好拍", g:"玖茶 JIU CHA Clerk Street Edinburgh", leg:{m:"walk", t:"🚶 步行5分钟（同一条路往南）"}},
-    {t:"13:05", stay:"≈20分钟", n:"🥛 The Refillery（帖子里的 cow juice）", ll:[55.9383,-3.1787], d:"39 Newington Rd，<b>从玖茶步行5分钟，完全顺路</b>。全手工有机小店：主打<b>牛奶（就是那个 cow juice，很香，有奶皮）</b>，还有有机蔬菜、果酱蜂蜜、咖啡豆、手工皂。买瓶奶边走边喝", g:"The Refillery Newington Road Edinburgh", imgs:[G("AHRPTWk1Tx9w1E1a9srrQjcL0y1v3suKHtALJ94lWH60YtKs1yNLJY3JfNQkvvM0HsUH0CKgTyLEroRRg8T3T1LhFw5ydmS9thQ2sLbDakSGHHTWx766MB7cYD1UMLOeX32uXUo-wjq-"),G("APNQkAEBwdx3MLk5YbWlVx60a3FhrCAKtcYV9uQTunZLLQkqtZQDvi-3VpPhQPErDhqe8kSwBwJDuVUsB7VGfxZaRaL92cVYT2yv4tZQPVmJg29PF2tNxjZd0hlC2xjogYm17j9RaWws")], leg:{m:"walk", t:"🚶 往回走10分钟到 Nicolson St"}},
-    {t:"13:35", stay:"≈1小时", n:"南区午餐（Nicolson St一带）", ll:[55.9447,-3.1857], d:"这一带是学生区，好吃不贵的选择多", leg:{m:"walk", t:"🚶 步行15分钟经北桥到新城"}},
-    {t:"14:50", stay:"≈2.5小时", n:"新城逛街：Princes St → George St", ll:[55.9530,-3.1990], d:"王子街平价连锁，George St 精品店。<b>顺路必进 Oliver Bonas</b>（王子街上，帖子最爱的家居店：项链、盘子、杯碗，学生证有折扣）。中途可绕去 Circus Lane 小巷拍照。<br>🐷 如果 Oink 没吃够：<b>Oink Hanover St 分店</b>就在 George St 旁边（38 Hanover St）", g:"Oliver Bonas Princes Street Edinburgh", leg:{m:"walk", t:"🚶 步行5分钟"}},
-    {t:"17:45", stay:"≈1.5小时", n:"BABA 晚餐（黎巴嫩菜）", ll:[55.9524,-3.2073], d:"130 George St。帖子3星'可以试试不惊艳'：烤肉偏咸，pita饼趁热吃很香，两人约£55。不想吃这个就回老城随便找", g:"Baba George Street Edinburgh", imgs:[G("APNQkAEiGR0k5OnmBE9Cy_kbJZ-afSZ-H0pNZmFGsSvUxWUs42K2nvDYFPoxtVIPOPiXcMlWgL9MTBFioqOr4GMNSCz_UPCmxejS9K-QgOsjR_r1bYdbsqWTnX9FU-yXGurIgTA7uHrK7QYI9vM"),G("APNQkAGyIpg7nbOeL_7G_7GkREXYqkPGyGfng-kwnWW_1rLLcl4h-92IHfNfFLx6ZjXoIrhSHos7mbGh8ayyF3IEGEWY7iJG1VRLwMvnGpqRh1jMNjPOCfMnihdOFPI6HKVxW3BxghM"),G("APNQkAEW0IIx1oaEqNXJU2QqpuoMSFGtuypDsXacSWmz8Orr-qP5h_UP0CahYqR9SerFfkKlHWXTWGVSle99dJ0eFlNG9uu6pIxocy27L6NYRHZDBODc2wzA39f7DmGJyyZZLPNJmEd5")], leg:{m:"walk", t:"🚶 步行20分钟（天还大亮，不用赶）"}},
-    {t:"19:20", stay:"≈1.5小时", n:"🍸 Freddy's 酒吧（有 live 驻唱）", ll:[55.9524,-3.2003], d:"24 Frederick St，<b>从 BABA 走 3 分钟，顺路到不能再顺路</b>。帖子原话：本想去 Panda & Sons 但没预约、不让 walk in，随手找了这家结果被惊艳——<b>苹果口味的酒必点</b>（草莓的一般），周日晚不用排队，一直有驻唱。<br>💡 想去 Panda & Sons 的话<b>一定提前预约</b>", g:"Freddy's Edinburgh Frederick Street", imgs:[G("AHRPTWk5EQf9EbCAlFlPw6_lw73EgrKzXUCltKC4axvc0f5aO-FtMr129iM9bdgfev8hCUV0sfZBkLF_Em0OcGsw8snEFSDrALvd6PCjbFAWhKSjcWpHiONIVIaBgX8xz48TGDytJHBusQ"),G("AHRPTWl7l7i3KY1f9_M5UFmmG-8EBfxK8n9rE2YMmk61Tzp5k_ewSXdIoBt3sbkmo-pxwcVcR78okIDkifyXp1AUyx_JGefh_EAl_C7e79CINFXL9lYxGZESZmQIubWc92bcWpzJpzjVppgc-Ro")], leg:{m:"walk", t:"🚶 步行25分钟回住处（天还亮着，不用赶）"}},
-    {t:"21:00", stay:"自由", n:"回住处休息", ll:[55.9457,-3.2187], d:"⚠️之前这里写的'看日落余晖'是错的——<b>今天日落 21:48</b>，外面到 22:30 才真正黑。爬山累了早点休息"}
+    {t:"11:30", stay:"", n:"Airbnb 出发（睡饱再走）", ll:[55.9457,-3.2187], d:"早上太冷，不赶。出门前<b>先打 CALZEAT 0131 556 0856</b> 确认落下的两样东西留好了", leg:{m:"bus", t:"🚌 公交/电车≈15分钟到皇家一英里"}},
+    {t:"12:00", stay:"≈20分钟", n:"📞 CALZEAT 取回落下的纪念品", ll:[55.9505,-3.1858], d:"<b>89 High St, EH1 1SG｜电话 0131 556 0856</b>。昨天买的两样东西落这儿了——<b>先电话确认再来</b>，到店报一下昨天购买的情况就能取。取到顺便看看有没有想补的羊毛制品", g:"Calzeat High Street Edinburgh", leg:{m:"walk", t:"🚶 沿皇家一英里下坡走到荷里路德宫山脚 ≈15分钟"}},
+    {t:"12:35", stay:"≈2小时（可缩短）", n:"亚瑟王座 Arthur's Seat", ll:[55.9441,-3.1618], d:"死火山徒步，从荷里路德宫侧上山。<b>今天 20°C 少云，中午爬不算晒</b>，穿运动鞋带水。往返约 2 小时；<b>累的话走到 Salisbury Crags 拍照就折返，也够美</b>", g:"Arthur's Seat Edinburgh", imgs:[G("APNQkAGNa2ZToZwucI9gTRxB8uhkPMVPEWe_r23p3iNW9qSv2IXjumLMI-zbdcSZyexAeQFzMe5yiOvx9_W2ffmeG7QtI1BojEj9rtAPjC_yILFa0Pr9b2NOWkIteaRSsWjOHxTMpgTZ"),G("AHRPTWmXCvzjaYJ2e_AIfkogb8yoOJBkyVhxQxd0ETYz7BZLJSCCCrG0-GHlC8aV5Xmy8wO7XyG83y6faxJBPPeTRDAPe-KEc0Vq2gra-0ZxhvSe5SpNflU9_vqjOXVVd3h8yVkf6vJa"),G("AHRPTWkyJZC8bTRXY0tUYZ5oEfF_4MJjNlekEnKWZoeFhBUUBk_CUo4VC6ByPxzlPLDF4GPfWegA3PDN541EICEAw7QkU14P4y-xDg6nHUNwi881qZesOOnOf-SEZiy7XBA3I0z7NtJe9iA2Mnc")], leg:{m:"walk", t:"🚶 下山往南走15分钟"}},
+    {t:"14:45", stay:"≈30分钟", n:"玖茶 手作奶茶（当午后）", ll:[55.9410,-3.1827], d:"16 Clerk St，就在山下这一片！龙眼栀子椰/希腊山楂冰乳酪/霸气榴莲(猫山王)。店员讲中文，复古上海风好拍", g:"玖茶 JIU CHA Clerk Street Edinburgh", leg:{m:"walk", t:"🚶 步行5分钟（同一条路往南）"}},
+    {t:"15:20", stay:"≈20分钟", n:"🥛 The Refillery（帖子里的 cow juice）", ll:[55.9383,-3.1787], d:"39 Newington Rd，<b>从玖茶步行5分钟，完全顺路</b>。全手工有机小店：主打<b>牛奶（就是那个 cow juice，很香，有奶皮）</b>，还有有机蔬菜、果酱蜂蜜、咖啡豆、手工皂。买瓶奶边走边喝", g:"The Refillery Newington Road Edinburgh", imgs:[G("AHRPTWk1Tx9w1E1a9srrQjcL0y1v3suKHtALJ94lWH60YtKs1yNLJY3JfNQkvvM0HsUH0CKgTyLEroRRg8T3T1LhFw5ydmS9thQ2sLbDakSGHHTWx766MB7cYD1UMLOeX32uXUo-wjq-"),G("APNQkAEBwdx3MLk5YbWlVx60a3FhrCAKtcYV9uQTunZLLQkqtZQDvi-3VpPhQPErDhqe8kSwBwJDuVUsB7VGfxZaRaL92cVYT2yv4tZQPVmJg29PF2tNxjZd0hlC2xjogYm17j9RaWws")], leg:{m:"walk", t:"🚶 步行15分钟经北桥到新城"}},
+    {t:"16:00", stay:"≈2.5小时", n:"新城逛街 + 晚点午餐", ll:[55.9530,-3.1990], d:"王子街平价连锁，George St 精品店。<b>顺路必进 Oliver Bonas</b>（王子街上，帖子最爱的家居店：项链、盘子、杯碗，学生证有折扣）。中途可绕去 Circus Lane 小巷拍照。饿了这一带随便找家吃个正餐垫一下（BABA 偏轻食）", g:"Oliver Bonas Princes Street Edinburgh", leg:{m:"walk", t:"🚶 步行5分钟"}},
+    {t:"18:30", stay:"≈1.5小时", n:"BABA 晚餐（黎巴嫩菜）", ll:[55.9524,-3.2073], d:"130 George St。帖子3星'可以试试不惊艳'：烤肉偏咸，pita饼趁热吃很香，两人约£55。不想吃这个就回老城随便找", g:"Baba George Street Edinburgh", imgs:[G("APNQkAEiGR0k5OnmBE9Cy_kbJZ-afSZ-H0pNZmFGsSvUxWUs42K2nvDYFPoxtVIPOPiXcMlWgL9MTBFioqOr4GMNSCz_UPCmxejS9K-QgOsjR_r1bYdbsqWTnX9FU-yXGurIgTA7uHrK7QYI9vM"),G("APNQkAGyIpg7nbOeL_7G_7GkREXYqkPGyGfng-kwnWW_1rLLcl4h-92IHfNfFLx6ZjXoIrhSHos7mbGh8ayyF3IEGEWY7iJG1VRLwMvnGpqRh1jMNjPOCfMnihdOFPI6HKVxW3BxghM"),G("APNQkAEW0IIx1oaEqNXJU2QqpuoMSFGtuypDsXacSWmz8Orr-qP5h_UP0CahYqR9SerFfkKlHWXTWGVSle99dJ0eFlNG9uu6pIxocy27L6NYRHZDBODc2wzA39f7DmGJyyZZLPNJmEd5")], leg:{m:"walk", t:"🚶 步行3分钟到 Frederick St"}},
+    {t:"20:00", stay:"≈1小时", n:"🍸 Freddy's 酒吧（有 live 驻唱）", ll:[55.9524,-3.2003], d:"24 Frederick St，<b>从 BABA 走 3 分钟，顺路</b>。帖子原话：本想去 Panda & Sons 但没约上，随手找了这家结果被惊艳——<b>苹果口味的酒必点</b>（草莓的一般），一直有驻唱。<br>💡 Panda & Sons 已经帮你订在 7/16 了", g:"Freddy's Edinburgh Frederick Street", imgs:[G("AHRPTWk5EQf9EbCAlFlPw6_lw73EgrKzXUCltKC4axvc0f5aO-FtMr129iM9bdgfev8hCUV0sfZBkLF_Em0OcGsw8snEFSDrALvd6PCjbFAWhKSjcWpHiONIVIaBgX8xz48TGDytJHBusQ"),G("AHRPTWl7l7i3KY1f9_M5UFmmG-8EBfxK8n9rE2YMmk61Tzp5k_ewSXdIoBt3sbkmo-pxwcVcR78okIDkifyXp1AUyx_JGefh_EAl_C7e79CINFXL9lYxGZESZmQIubWc92bcWpzJpzjVppgc-Ro")], leg:{m:"walk", t:"🚶 步行15分钟到卡尔顿山（沿王子街往东）"}},
+    {t:"21:00", stay:"看日落≈1小时", n:"🌇 卡尔顿山 Calton Hill 看日落（补昨天）", ll:[55.9553,-3.1825], d:"<b>昨天没找对地方，今天补上。</b>上山口在 Regent Rd 上，有一段石阶，<b>10 分钟就登顶</b>，别走岔了。顶上有国家纪念碑（那排希腊柱子）和天文台，<b>全城最佳日落机位</b>，能同时拍到城堡、王子街和亚瑟王座。日落 21:48，21:00 上去正好卡住金色时刻", g:"Calton Hill Edinburgh", imgs:[G("AHRPTWm3BCn64mmv6vpEcjlCsTsBgaNTMNW0w6k4Pvp7_4oq3nfnuSuMuJM0GnL_dwtFyOkgM8ocxgbb0fcBjx5r_GJm-3r_smi_vX1cSvO_G3lMtrwjCB2Y48ET4Mjn_iubeQUz2pUxOst4FMfd"),G("AHRPTWnjIastPyJZxuHpwFbUkT6uX-WGSYJUHDFO7nUybq27zmPGNEx6SBJldL5mzZeq8KiwV9iaNS1PNylo0uTDbIcIZp5xzCYmCGht4gb1sSNGEc4Pcrakorhu5OEk_EvDhiD-XlvZw-USWjtn"),G("AHRPTWkKw7NS5BOJdqr3rN01wvqFlDEIQWaoQBjtKRPwS0RKF9c39pwqdiNsIeVy89GGu0OiDk_OakNoCf3IxZa56XE3MkQaJc0rpEmivq15oClxFrTfK4nRs0L_SRb7NuJSvv3pWVgC")], leg:{m:"walk", t:"🚶 步行/公交 20分钟回住处（天还亮）"}},
+    {t:"22:15", stay:"晚安💤", n:"回住处休息", ll:[55.9457,-3.2187], d:"外面到 22:30 才真正黑，慢慢走回去就行"}
   ],
   extras:[
     {n:"Dean Village（备选）", ll:[55.9520,-3.2192], d:"童话感石头村，离住处步行15分钟，如果下午体力够可以替换掉一段逛街"}
@@ -390,7 +391,18 @@ DAYS.forEach((d,i)=>{
   t.onclick=()=>showDay(i);
   tabs.appendChild(t);
 });
-showDay(0);
+
+// 打开时自动跳到「今天」对应的那一页；没有对应日期就默认第一页
+function todayIndex(){
+  const now = new Date();
+  const m = now.getMonth()+1, day = now.getDate();
+  for (let i=0;i<DAYS.length;i++){
+    const mt = (DAYS[i].name||'').match(/(\d{1,2})\/(\d{1,2})/);
+    if (mt && +mt[1]===m && +mt[2]===day) return i;
+  }
+  return 0;
+}
+showDay(todayIndex());
 </script>
 </body>
 </html>
