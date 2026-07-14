@@ -62,6 +62,16 @@
   .gmaps { display:inline-block; margin-top:6px; font-size:11px; color:#c0392b; border:1px solid #e8c9c3; background:#fdf1ef; border-radius:12px; padding:2px 8px; text-decoration:none; }
   #lb { position:fixed; inset:0; background:rgba(0,0,0,.88); display:none; align-items:center; justify-content:center; z-index:9999; }
   #lb img { max-width:94%; max-height:94%; border-radius:8px; }
+  /* 总清单 */
+  .clsec { margin-bottom:14px; }
+  .clsec h4 { font-size:13px; color:#8e3b2e; margin:0 0 6px; padding-bottom:4px; border-bottom:1px solid #e5ddd2; }
+  .cl { display:flex; gap:8px; align-items:flex-start; background:#fff; border-radius:8px; padding:8px 10px; margin-bottom:5px; box-shadow:0 1px 2px rgba(0,0,0,.06); cursor:pointer; }
+  .cl input { margin-top:3px; width:16px; height:16px; accent-color:#c0392b; flex-shrink:0; }
+  .cl span { flex:1; }
+  .cl b { display:block; font-size:12.8px; color:#333; }
+  .cl i { display:block; font-style:normal; font-size:11.5px; color:#777; line-height:1.5; margin-top:2px; }
+  .cl.done { opacity:.45; }
+  .cl.done b { text-decoration:line-through; }
 </style>
 </head>
 <body>
@@ -223,10 +233,16 @@ const DAYS = [
     {t:"10:30", stay:"≈2小时", n:"苏格兰国立博物馆（免费）", ll:[55.9470,-3.1905], d:"Chambers St。免费，多莉羊标本在这，屋顶露台能看城堡", g:"National Museum of Scotland", imgs:[G("AHRPTWnr2FSuEfYHiqJuc5AqyxOq6yPVNBUhHs2I77zqRe38r4aVceerMPu6gvAaUzBbY3kqZkGXFEjM0IVFuJAWa74ZwiJyoiKr5ESs5nYlGGQxexbJ7PH34s5XSBRwa7AjVV2xrc82"),G("APNQkAGvciwmenBebJGckg-w_6zU7-pKRQNOXfkoSZTA61tuZwm_jGK04Us0SbrZd6MtvZDVo-wDku7huRGgedAmtcz9ooONx1zG1pPzofzGyPocEVRDpvgdaGKz9BD6NQ5hsFzeFmBa"),G("APNQkAH4Aeb1Xgz9E6tSJGJsaXDjfkL_C7a0wU1t2hDyh2d81DLJ3-4v8TlY90bQYMyhnVcPOZN6Q-VKJukjWTWw0a4Fy0cVqIElrrcMYh4HRdYmsRWxSq7C7msXaV2nkQ0LziUGKnu1TwS62_LB")], leg:{m:"walk", t:"🚶 步行3分钟"}},
     {t:"12:45", stay:"合影+午餐≈1.5小时", n:"忠犬波比像 + Grassmarket 午餐", ll:[55.9469,-3.1922], d:"博物馆门口就是Greyfriars Bobby小狗像，摸鼻子好运。Grassmarket一带午餐", g:"Greyfriars Bobby Statue Edinburgh", imgs:[G("AHRPTWnM5UoSwIM9BgtOZ63Sd9FxgGJ0wIVRonkRBMgEZ_Hmdm6qyPPnR-JkD-ELpBVsPbektyR00x7BOcMrYJLQtUDomlMPyi1aHKgxs4RRxY8oyHIDXmTJPGPII1nY8bIbqy_mPhUe")], leg:{m:"bus", t:"🚌 公交≈30分钟去Portobello（North Bridge上车）"}},
     {t:"14:45", stay:"≈2小时", n:"Portobello 海滩（天气好）", ll:[55.9531,-3.1147], d:"本地人的海滩，散步吃冰淇淋。天气不好→改成Stockbridge小店街+Circus Lane（后两张就是Circus Lane）", g:"Portobello Beach Edinburgh", imgs:[G("AHRPTWlVCPiXzTVVwWJpu1NjNcsjFE9noCmDtWbYIn9osw0vuSdD-2xNpq7dXsv6gKWQO_tASgbkq7cQHv4vAcUkqcwlfFIUCdgxXh5Y87D-1OYFPEcrErl7GPIxd2G9bRRcMH6ML9F4Zw"),G("APNQkAFdQrTy2QWUFxCee_wNrkkidpjyFdAsATwpAZZTtl5kX7hQxCtj9h6A9n8VHYes93TROmSxnezPcXVBiW-dzfsPW7eEBpUL-Jdk-WgVd23fbJfSqtFlTmdeAnr7Hga4Ri_aOF_Sdw"),G("APNQkAHiEOa1KZ19Y5lZKjTcsuItI3i1R-DMdtNkDdcq-yYjdRcjhDuMsfivaBfonVJKU3x3AfurzG2H5SFCdKtOMihjshe4bUG--un4QVK5NWWl5x8s2UWUMYT6oOAmxdDxNWJtppcL"),G("APNQkAGszcn4pJuxQRTd5BMyL8iI-4V-nh5-ovSwJASZ7NilyALMvR8Lj7Jis1esPYWeIp9KenHDrX7um0nN6RqMDsylm0Hc7YretLeK7yI56CJMfw8blrDXFoLd6PBC_Ghx7i0zOaj_")], leg:{m:"bus", t:"🚌 公交≈35分钟回市中心"}},
-    {t:"17:30", stay:"≈1小时", n:"皇家一英里 补漏（7/14 没买齐的）", ll:[55.9497,-3.1900], d:"<b>最后机会，按店名直接找，别瞎逛（店 18:00 前后就关了）：</b><br>🥃 <b>Royal Mile Whiskies</b>｜379 High St — 威士忌、honey whisky、小罐鸡尾酒<br>🧸 <b>Heritage of Scotland</b>｜High St — 风笛小熊 ≈£14（伦敦买不到）、caramel 威化饼 £2.99<br>🧣 <b>CALZEAT</b>｜89 High St — 苏格兰本地产羊毛/羊绒<br>🍪 <b>Walker 黄油饼干</b>｜认准高地牛🐮、黑脸羊🐑造型（苏格兰限定）<br>☕ <b>Cockburn Street</b>｜岔下去 2 分钟，咖啡店和家居小店<br>💡 Jellycat 高地牛在街上各家礼品店都有", g:"Royal Mile Whiskies Edinburgh", imgs:[G("AHRPTWlAHStmTRmaMkjBQJFIpBUV5JrePJMQi3R_BBcSIhAplKgi3l59O5dxMZ72VAA_KFEBSkePWhqpckIOojfQtQ1sNOGgsYe-tHNFJuuPm4dW-RFOzzb-65CILt5cLvz6LzwchcSDVVhgPkU"),G("AHRPTWkttTNoSx1JpUrdw2hTb0CzLVAvmOS1T2hvb_umVA9hDFxnylnOG4rXEqjRZ8M1ab-3vngBA6gd-EK4TQJTCzLiDqWDtDgVXJl4ue3aHqb7QwWriyrBQcOEGTAHYXhsCRpwVLGzJQ")], leg:{m:"walk", t:"🚶/🚌 回住处，收拾行李"}},
-    {t:"19:30", stay:"", n:"晚餐自选 + 收拾行李", ll:[55.9457,-3.2187], d:"想吃中餐可以再去玖茶那条街，Clerk St附近中餐多"}
+    {t:"17:00", stay:"", n:"回住处 + 收拾行李", ll:[55.9457,-3.2187], d:"<b>伴手礼 7/14 已经买完了，今天不用再跑皇家一英里。</b>晚餐随意——想吃中餐就去 Clerk St 那条街（玖茶附近中餐多）。<br>👇 下面「⭐ 备选」是还没排进行程的，<b>想去就去，不想去就好好休息</b>，今天本来就是机动日"}
   ],
-  extras:[]
+  extras:[
+    {n:"❓ Dean Village 童话石头村", ll:[55.9520,-3.2192], d:"离住处步行15分钟，最出片的地方之一。<b>要去吗？</b>下午或傍晚人少最好拍"},
+    {n:"❓ Circus Lane + Stockbridge", ll:[55.9570,-3.2070], d:"网红石板小巷 + 一整片小店街（周日有集市）。<b>要去吗？</b>下雨天的最佳替代方案"},
+    {n:"❓ 卡尔顿山 再上一次看日落", ll:[55.9553,-3.1825], d:"日落 21:47。7/14 去过了，喜欢的话可以再来一次，最后一晚的爱丁堡"},
+    {n:"❓ Oink Canongate 分店", ll:[55.9520,-3.1769], d:"82 Canongate。7/14 的 Oink 好吃的话，这家在皇家一英里下段，顺路再来一个"},
+    {n:"❓ Panda & Sons 酒吧（需提前预约！）", ll:[55.9542,-3.2013], d:"帖子里想去但没约上的那家（不接受 walk in）。<b>想去的话今天就得先订位</b>"},
+    {n:"❓ 荷里路德宫 Holyrood Palace", ll:[55.9527,-3.1725], d:"女王在苏格兰的官邸，门票约£20。皇家一英里最下端，7/15 爬亚瑟王座时路过门口"}
+  ]
 },
 {
   name:"7/17 返程伦敦",
@@ -239,6 +255,47 @@ const DAYS = [
     {t:"21:20", stay:"", n:"伦敦 Stansted 机场", ll:[51.8860,0.2389], d:"Stansted Express火车≈50分钟到Liverpool Street，或National Express大巴（便宜但慢）。到家啦🏠 伦敦的收藏看另一张地图！"}
   ],
   extras:[]
+},
+{
+  name:"🛍️ 总清单",
+  center:[55.9500,-3.1900], zoom:14,
+  note:`<b>所有要买的、要吃的，一页看完。</b>点一下打勾，买完/吃完自己划掉。<br>
+  📌 原则：<b>伴手礼全部集中在 7/14 一天买完</b>（城堡→维多利亚街→皇家一英里一条下坡线走下来，不用来回跑）。`,
+  stops:[],
+  extras:[],
+  checklist:[
+    {h:"🛍️ 伴手礼（7/14 一天买完，全在同一条线上）", items:[
+      ["羊毛围巾 ≈£15","CALZEAT（89 High St，本地产）或 Edinburgh Cashmere & Lambswool。羊毛 wool 就够，cashmere 不是苏格兰产的"],
+      ["风笛小熊 ≈£14","Heritage of Scotland（High St）。帖子说这家质感最好，<b>伦敦买不到</b>"],
+      ["caramel 威化饼 £2.99","同上 Heritage of Scotland。黑色包装"],
+      ["Walker 黄油饼干","认准<b>高地牛🐮 / 黑脸羊🐑</b>造型（苏格兰限定）。到处都有，别在景区买贵"],
+      ["威士忌 / honey whisky","Royal Mile Whiskies（379 High St）。还有小罐鸡尾酒，很可爱"],
+      ["羊毛毡小羊挂件 ≈£13","Baabaa Sheep。价格偏贵，看到再说"],
+      ["设计感冰箱贴","Scottish Design Exchange，本地艺术家作品，比游客店贵但特别"],
+      ["Jellycat 高地牛","皇家一英里各家礼品店都有"],
+      ["Strathberry 包","维多利亚街 4 号。本地轻奢，帖子说设计好到背了 5 个回国"],
+      ["Oliver Bonas 家居/首饰","王子街（7/15 逛新城时顺路）。项链、盘子、杯碗，有学生折扣"]
+    ]},
+    {h:"🍽️ 要吃的（已排进行程）", items:[
+      ["Betty's 下午茶｜7/12 约克","司康是精华，£13.5 两个司康+茶。下层三明治免费续"],
+      ["约克小鬼 + 黄油啤酒｜7/12 肉铺街","小£9/大£18；黄油啤酒 £4.99 有魔法表演"],
+      ["Drake's 炸鱼薯条｜7/12 晚餐","帖子认证'吃过最好吃'，记得撒盐"],
+      ["🐷 Oink 烤猪肉卷｜7/14 午餐","34 Victoria St。中号 Oink + <b>苹果酱</b>；chilli jam 太甜别点"],
+      ["Makars 苏格兰餐｜7/14 晚餐","<b>不可预约，16:30 去拿号</b>。羊肉>牛肉，scotch egg 必点"],
+      ["Knoops 热巧克力｜7/14 饭后","可选巧克力浓度"],
+      ["玖茶 手作奶茶｜7/15","16 Clerk St。龙眼栀子椰 / 霸气榴莲，店员讲中文"],
+      ["🥛 The Refillery cow juice｜7/15","39 Newington Rd，距玖茶 5 分钟。有机牛奶，很香有奶皮"],
+      ["BABA 黎巴嫩菜｜7/15 晚餐","130 George St。帖子 3 星：pita 趁热吃，烤肉偏咸"],
+      ["🍸 Freddy's 酒吧｜7/15 饭后","24 Frederick St，距 BABA 3 分钟。<b>苹果口味的酒必点</b>，有 live 驻唱"]
+    ]},
+    {h:"⚠️ 要提前订 / 别忘了", items:[
+      ["达西庄园门票","出发前官网订好，House+Garden 工作日 £32"],
+      ["7/13 谢菲→爱丁堡的纸质票","<b>先去取票机取票</b>再上车"],
+      ["Panda & Sons 酒吧","想去必须提前预约，<b>不接受 walk in</b>"],
+      ["瑞安航空提前网上值机","不然柜台值机要收费；行李尺寸卡得严"],
+      ["Makars 16:30 拿号","不可预约，晚了要等很久"]
+    ]}
+  ]
 }
 ];
 
@@ -297,6 +354,18 @@ function showDay(idx){
     }
   });
   side.appendChild(tl);
+  // 总清单页
+  if (d.checklist){
+    d.checklist.forEach(sec=>{
+      const box=document.createElement('div'); box.className='clsec';
+      box.innerHTML = `<h4>${sec.h}</h4>` + sec.items.map(([t,sub])=>
+        `<label class="cl"><input type="checkbox"><span><b>${t}</b><i>${sub}</i></span></label>`).join('');
+      side.appendChild(box);
+    });
+    side.querySelectorAll('.cl input').forEach(cb=>{
+      cb.onchange = ()=> cb.closest('.cl').classList.toggle('done', cb.checked);
+    });
+  }
   if (d.extras && d.extras.length){
     const ex = document.createElement('div'); ex.className='extras';
     ex.innerHTML = '<h4>⭐ 顺路备选（没排进主线）</h4>';
@@ -310,7 +379,8 @@ function showDay(idx){
     });
     side.appendChild(ex);
   }
-  map.fitBounds(L.latLngBounds(pts).pad(0.15));
+  if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.15));
+  else if (d.center) map.setView(d.center, d.zoom||13);
 }
 const tabs = document.getElementById('tabs');
 DAYS.forEach((d,i)=>{
